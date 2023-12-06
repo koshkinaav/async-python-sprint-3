@@ -32,7 +32,7 @@ class Server:
             yield num
             num += 1
 
-    def get_method_path_params(self, request: bytes) -> tuple:
+    def _get_method_path_params(self, request: bytes) -> tuple:
 
         headers = request.decode().split('\r\n')
         # Парсинг заголовков
@@ -73,7 +73,6 @@ class Server:
 
     def post_create_new_chat(self, params: dict) -> str:
         client_ids = params.get('client_ids')
-        print(client_ids)
         try:
             if len(client_ids) < 2:
                 logging.info('POST /create_new_chat 400')
@@ -96,7 +95,7 @@ class Server:
 
     def post_send_message(self, params: dict) -> str:
         chat_id = params.get('chat_id')[0]
-        client = params.get('client', [''])[0]
+        client = params.get('client')[0]
         message = params.get('message', [''])[0]
         if chat_id and client and message:
             chat = self.chats[int(chat_id)]
@@ -132,8 +131,9 @@ class Server:
             return response
 
     async def handle_request(self, reader: asyncio.streams.StreamReader, writer: asyncio.streams.StreamWriter) -> None:
+        response = 'None'
         request = await reader.readline()
-        method, path, params = self.get_method_path_params(request)
+        method, path, params = self._get_method_path_params(request)
         if method == 'GET' and path == '/users':
             response = self.get_users()
         elif method == 'POST' and path == '/add_new_user':
@@ -144,9 +144,10 @@ class Server:
             response = self.post_send_message(params)
         elif method == 'GET' and path == '/get_messages':
             response = self.get_messages(params)
-        writer.write(response.encode())
-        await writer.drain()
-        writer.close()
+        if response != 'None':
+            writer.write(response.encode())
+            await writer.drain()
+            writer.close()
 
     async def start_server(self) -> None:
         server_object = await asyncio.start_server(
@@ -159,6 +160,6 @@ class Server:
             await server_object.serve_forever()
 
 
-server = Server()
-
-asyncio.run(server.start_server())
+if __name__ == '__main__':
+    server = Server()
+    asyncio.run(server.start_server())

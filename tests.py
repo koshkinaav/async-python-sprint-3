@@ -6,7 +6,6 @@ class MyTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        print("Run before all tests...")
         js_Alex = {"nickname": 'Alex'}
         r_Alex = requests.post('http://127.0.0.1:8080/add_new_user', params=js_Alex)
         js_Andrew = {"nickname": 'Andrew'}
@@ -36,7 +35,6 @@ class MyTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        print("Run after all tests...")
         js = {"chat_id": 0, "client": 'Andrew'}
         r = requests.get('http://127.0.0.1:8080/get_messages', params=js)
         MyTest().assertEqual(r.text, "[{'client_id': 'Andrew', 'message': 'Hello world'}]")

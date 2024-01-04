@@ -131,7 +131,7 @@ class Server:
             return response
 
     async def handle_request(self, reader: asyncio.streams.StreamReader, writer: asyncio.streams.StreamWriter) -> None:
-        response = 'None'
+        response = None
         request = await reader.readline()
         method, path, params = self._get_method_path_params(request)
         if method == 'GET' and path == '/users':
